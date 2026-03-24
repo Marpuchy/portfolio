@@ -1,5 +1,6 @@
 import { Reveal } from "@/components/ui/reveal";
 import { SectionShell } from "@/components/ui/section-shell";
+import type { SiteContent } from "@/data/site-content";
 
 type ContactLink = {
   label: string;
@@ -9,17 +10,18 @@ type ContactLink = {
 
 type ContactSectionProps = {
   links: ContactLink[];
+  copy: SiteContent["copy"]["contact"];
 };
 
-export function ContactSection({ links }: ContactSectionProps) {
+export function ContactSection({ links, copy }: ContactSectionProps) {
   return (
     <SectionShell
       id="contact"
-      label="Contact"
-      title="Direct links, no friction."
+      label={copy.label}
+      title={copy.title}
       className="pb-12 pt-4"
     >
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {links.map((link, index) => (
           <Reveal
             key={link.label}
@@ -37,7 +39,7 @@ export function ContactSection({ links }: ContactSectionProps) {
               target="_blank"
               rel="noreferrer"
             >
-              Open
+              {copy.open}
             </a>
           </Reveal>
         ))}

@@ -1,5 +1,6 @@
 import { Reveal } from "@/components/ui/reveal";
 import { SectionShell } from "@/components/ui/section-shell";
+import type { SiteContent } from "@/data/site-content";
 
 type ExpertiseArea = {
   title: string;
@@ -9,14 +10,15 @@ type ExpertiseArea = {
 
 type ExpertiseSectionProps = {
   areas: ExpertiseArea[];
+  copy: SiteContent["copy"]["expertise"];
 };
 
-export function ExpertiseSection({ areas }: ExpertiseSectionProps) {
+export function ExpertiseSection({ areas, copy }: ExpertiseSectionProps) {
   return (
     <SectionShell
       id="expertise"
-      label="Expertise"
-      title="Dual profile, one delivery standard."
+      label={copy.label}
+      title={copy.title}
       className="pt-4"
     >
       <div className="grid gap-4 md:grid-cols-2">
@@ -26,9 +28,7 @@ export function ExpertiseSection({ areas }: ExpertiseSectionProps) {
             delay={index * 110}
             className="surface-muted depth-card h-full p-5 transition duration-300 hover:border-[var(--border-strong)] sm:p-6"
           >
-            <p className="eyebrow">Track 0{index + 1}</p>
-
-            <h3 className="mt-4 text-2xl font-medium tracking-[-0.04em] text-[var(--foreground)]">
+            <h3 className="text-2xl font-medium tracking-[-0.04em] text-[var(--foreground)]">
               {area.title}
             </h3>
             <p className="mt-3 text-sm leading-6 text-[var(--foreground-muted)]">{area.summary}</p>

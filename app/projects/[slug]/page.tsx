@@ -9,7 +9,9 @@ import { ProjectListPanel } from "@/components/projects/project-list-panel";
 import { ProjectMedia } from "@/components/projects/project-media";
 import { LinkButton } from "@/components/ui/link-button";
 import { Reveal } from "@/components/ui/reveal";
-import { featuredProjects, getProjectBySlug, projectSlugs } from "@/data/projects";
+import { getSiteContent } from "@/data/site-content";
+import { getFeaturedProjects, getProjectBySlug, projectSlugs } from "@/data/projects";
+import { getRequestLocale } from "@/lib/request-locale";
 
 type ProjectPageProps = {
   params: Promise<{
@@ -24,12 +26,14 @@ export function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: ProjectPageProps): Promise<Metadata> {
+  const locale = await getRequestLocale();
+  const siteContent = getSiteContent(locale);
   const { slug } = await params;
-  const project = getProjectBySlug(slug);
+  const project = getProjectBySlug(slug, locale);
 
   if (!project) {
     return {
-      title: "Project Not Found | Marc Ib\u00e1\u00f1ez",
+      title: siteContent.copy.projectPage.notFoundTitle,
     };
   }
 
@@ -40,24 +44,26 @@ export async function generateMetadata({
 }
 
 export default async function ProjectPage({ params }: ProjectPageProps) {
+  const locale = await getRequestLocale();
+  const siteContent = getSiteContent(locale);
   const { slug } = await params;
-  const project = getProjectBySlug(slug);
+  const project = getProjectBySlug(slug, locale);
 
   if (!project) {
     notFound();
   }
 
-  const relatedProjects = featuredProjects.filter(
+  const relatedProjects = getFeaturedProjects(locale).filter(
     (featuredProject) => featuredProject.slug !== project.slug,
   );
 
   const quickFacts: ProjectFact[] = [
-    { label: "Role", value: project.role },
-    { label: "Type", value: project.type },
-    { label: "Status", value: project.status },
-    { label: "Focus", value: project.focus.join(" / ") },
-    { label: "Year", value: String(project.year), mono: true },
-    { label: "Route", value: `/${project.slug}`, mono: true },
+    { label: siteContent.copy.projectPage.facts.role, value: project.role },
+    { label: siteContent.copy.projectPage.facts.type, value: project.type },
+    { label: siteContent.copy.projectPage.facts.status, value: project.status },
+    { label: siteContent.copy.projectPage.facts.focus, value: project.focus.join(" / ") },
+    { label: siteContent.copy.projectPage.facts.year, value: String(project.year), mono: true },
+    { label: siteContent.copy.projectPage.facts.route, value: `/${project.slug}`, mono: true },
   ];
 
   return (
@@ -67,15 +73,15 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           <div className="flex flex-wrap items-center gap-3">
             <LinkButton href="/" variant="ghost" className="px-0 py-0 hover:translate-y-0">
               <span aria-hidden="true">{"<"}</span>
-              Back to home
+              {siteContent.copy.projectPage.backHome}
             </LinkButton>
             <LinkButton href="/#projects" variant="secondary" className="px-4 py-2.5">
-              View projects
+              {siteContent.copy.projectPage.viewProjects}
             </LinkButton>
           </div>
 
           <div className="mt-6 flex flex-wrap items-center gap-2.5">
-            <span className="eyebrow label-line">Case Study</span>
+            <span className="eyebrow label-line">{siteContent.copy.projectPage.caseStudy}</span>
             <span className="chip">{project.type}</span>
             <span className="chip">{project.status}</span>
           </div>
@@ -98,7 +104,11 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           </div>
 
           <div className="mt-8">
-            <ProjectActions project={project} showDetails={false} />
+            <ProjectActions
+              project={project}
+              showDetails={false}
+              labels={siteContent.copy.projectActions}
+            />
           </div>
         </Reveal>
 
@@ -115,9 +125,9 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
       <div className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1.06fr),minmax(20rem,0.94fr)]">
         <Reveal className="surface-muted depth-card p-5 sm:p-6">
-          <p className="eyebrow">Overview</p>
+          <p className="eyebrow">{siteContent.copy.projectPage.overviewLabel}</p>
           <h2 className="mt-4 text-2xl font-medium tracking-[-0.04em] text-[var(--foreground)]">
-            Concise product context
+            {siteContent.copy.projectPage.overviewTitle}
           </h2>
           <p className="mt-5 max-w-4xl text-sm leading-8 text-[var(--foreground-muted)] sm:text-[0.98rem]">
             {project.fullDescription}
@@ -125,9 +135,9 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
         </Reveal>
 
         <Reveal delay={100} className="surface-muted depth-card p-5 sm:p-6">
-          <p className="eyebrow">Quick Facts</p>
+          <p className="eyebrow">{siteContent.copy.projectPage.quickFactsLabel}</p>
           <h2 className="mt-4 text-2xl font-medium tracking-[-0.04em] text-[var(--foreground)]">
-            Role, status, focus, and stack
+            {siteContent.copy.projectPage.quickFactsTitle}
           </h2>
           <ProjectFacts facts={quickFacts} compact className="mt-5" />
           <div className="mt-5 flex flex-wrap gap-2">
@@ -141,9 +151,9 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
       </div>
 
       <Reveal delay={120} className="surface-muted depth-card mt-5 p-5 sm:p-6">
-        <p className="eyebrow">Gallery</p>
+        <p className="eyebrow">{siteContent.copy.projectPage.galleryLabel}</p>
         <h2 className="mt-4 text-2xl font-medium tracking-[-0.04em] text-[var(--foreground)]">
-          Real project media and supporting visuals
+          {siteContent.copy.projectPage.galleryTitle}
         </h2>
         <ProjectGallery items={project.gallery} className="mt-5" />
       </Reveal>
@@ -151,16 +161,16 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
       <div className="mt-5 grid gap-5 xl:grid-cols-2">
         <Reveal>
           <ProjectListPanel
-            label="Technical Approach"
-            title="How the implementation is structured"
+            label={siteContent.copy.projectPage.technicalApproachLabel}
+            title={siteContent.copy.projectPage.technicalApproachTitle}
             items={project.technicalApproach}
           />
         </Reveal>
 
         <Reveal delay={100}>
           <ProjectListPanel
-            label="Key Features"
-            title="What the project needs to communicate quickly"
+            label={siteContent.copy.projectPage.keyFeaturesLabel}
+            title={siteContent.copy.projectPage.keyFeaturesTitle}
             items={project.keyFeatures}
           />
         </Reveal>
@@ -168,21 +178,25 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
       <div className="mt-5 grid gap-5 xl:grid-cols-[minmax(18rem,0.7fr),minmax(0,1.3fr)]">
         <Reveal className="surface-muted depth-card p-5 sm:p-6">
-          <p className="eyebrow">External Links</p>
+          <p className="eyebrow">{siteContent.copy.projectPage.externalLinksLabel}</p>
           <h2 className="mt-4 text-2xl font-medium tracking-[-0.04em] text-[var(--foreground)]">
-            Direct access
+            {siteContent.copy.projectPage.externalLinksTitle}
           </h2>
           <p className="mt-4 text-sm leading-7 text-[var(--foreground-muted)]">
-            Repository access stays visible so recruiters and technical reviewers can jump from
-            the case study to the implementation immediately.
+            {siteContent.copy.projectPage.externalLinksDescription}
           </p>
-          <ProjectActions project={project} showDetails={false} className="mt-5" />
+          <ProjectActions
+            project={project}
+            showDetails={false}
+            className="mt-5"
+            labels={siteContent.copy.projectActions}
+          />
         </Reveal>
 
         <Reveal delay={110} className="surface-muted depth-card p-5 sm:p-6">
-          <p className="eyebrow">Other Featured Projects</p>
+          <p className="eyebrow">{siteContent.copy.projectPage.otherFeaturedLabel}</p>
           <h2 className="mt-4 text-2xl font-medium tracking-[-0.04em] text-[var(--foreground)]">
-            Related modules in the portfolio
+            {siteContent.copy.projectPage.otherFeaturedTitle}
           </h2>
           <div className="mt-5 grid gap-3 md:grid-cols-2">
             {relatedProjects.map((relatedProject) => (
