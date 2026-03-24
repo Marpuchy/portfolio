@@ -2,15 +2,21 @@ import { HeroInterface } from "@/components/sections/hero-interface";
 import { LinkButton } from "@/components/ui/link-button";
 import { Reveal } from "@/components/ui/reveal";
 import type { Project } from "@/data/projects";
-import type { Profile } from "@/data/profile";
+import type { SiteContent } from "@/data/site-content";
 
 type HeroSectionProps = {
-  profile: Profile;
-  projectCount: number;
+  profile: SiteContent["profile"];
   primaryProject: Project;
+  copy: SiteContent["copy"]["hero"];
+  actionLabels: SiteContent["copy"]["projectActions"];
 };
 
-export function HeroSection({ profile, projectCount, primaryProject }: HeroSectionProps) {
+export function HeroSection({
+  profile,
+  primaryProject,
+  copy,
+  actionLabels,
+}: HeroSectionProps) {
   return (
     <section
       id="projects"
@@ -21,33 +27,30 @@ export function HeroSection({ profile, projectCount, primaryProject }: HeroSecti
 
         <div className="grid gap-5 lg:grid-cols-[minmax(0,0.82fr),minmax(20rem,1.18fr)] lg:items-start lg:gap-6">
           <Reveal className="space-y-6">
-            <div className="space-y-4">
-              <p className="eyebrow label-line">Portfolio Interface</p>
-              <div className="space-y-3">
-                <p className="text-sm uppercase tracking-[0.22em] text-[var(--foreground-soft)]">
-                  {profile.role}
-                </p>
-                <h1 className="max-w-4xl text-[2.95rem] font-medium leading-none tracking-[-0.07em] text-[var(--foreground)] sm:text-[4.55rem] lg:text-[5.1rem]">
-                  {profile.name}
-                </h1>
-                <p className="max-w-2xl text-lg leading-8 text-[var(--foreground-muted)] sm:text-[1.35rem]">
-                  <span className="text-gradient">{profile.tagline}</span>
-                </p>
-              </div>
+            <div className="space-y-3">
+              <p className="text-sm uppercase tracking-[0.22em] text-[var(--foreground-soft)]">
+                {profile.role}
+              </p>
+              <h1 className="max-w-4xl text-[2.95rem] font-medium leading-none tracking-[-0.07em] text-[var(--foreground)] sm:text-[4.55rem] lg:text-[5.1rem]">
+                {profile.name}
+              </h1>
+              <p className="max-w-2xl text-lg leading-8 text-[var(--foreground-muted)] sm:text-[1.35rem]">
+                <span className="text-gradient">{profile.tagline}</span>
+              </p>
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
               <LinkButton href="/#featured-grid" variant="primary" className="min-w-[10.5rem]">
-                View Projects
+                {copy.viewProjects}
               </LinkButton>
-              <span className="rounded-full border border-[var(--border)] bg-[rgba(10,15,23,0.56)] px-4 py-3 font-[var(--font-mono)] text-xs uppercase tracking-[0.22em] text-[var(--foreground-muted)]">
-                {String(projectCount).padStart(2, "0")} featured modules
-              </span>
+              <LinkButton href={profile.cvUrl} variant="secondary" className="min-w-[8rem]">
+                {copy.viewCv}
+              </LinkButton>
             </div>
           </Reveal>
 
           <Reveal delay={120}>
-            <HeroInterface project={primaryProject} />
+            <HeroInterface project={primaryProject} copy={copy} actionLabels={actionLabels} />
           </Reveal>
         </div>
       </div>

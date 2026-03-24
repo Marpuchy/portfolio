@@ -4,18 +4,30 @@ import { ProjectActions } from "@/components/projects/project-actions";
 import { ProjectCompactMeta } from "@/components/projects/project-compact-meta";
 import { ProjectMedia } from "@/components/projects/project-media";
 import { Reveal } from "@/components/ui/reveal";
+import type { SiteContent } from "@/data/site-content";
 import type { Project } from "@/data/projects";
 
 type ProjectShowcaseCardProps = {
   project: Project;
   index: number;
+  copy: {
+    roleLabel: string;
+    stackLabel: string;
+    focusLabel: string;
+  };
+  actionLabels: SiteContent["copy"]["projectActions"];
 };
 
-export function ProjectShowcaseCard({ project, index }: ProjectShowcaseCardProps) {
+export function ProjectShowcaseCard({
+  project,
+  index,
+  copy,
+  actionLabels,
+}: ProjectShowcaseCardProps) {
   const metaItems = [
-    { label: "Role", value: project.role },
-    { label: "Stack", value: project.stack.slice(0, 3).join(" / ") },
-    { label: "Focus", value: project.focus.slice(0, 2).join(" / ") },
+    { label: copy.roleLabel, value: project.role },
+    { label: copy.stackLabel, value: project.stack.slice(0, 3).join(" / ") },
+    { label: copy.focusLabel, value: project.focus.slice(0, 2).join(" / ") },
   ];
 
   return (
@@ -24,7 +36,6 @@ export function ProjectShowcaseCard({ project, index }: ProjectShowcaseCardProps
         <Link
           href={`/projects/${project.slug}`}
           className="group/media block focus-visible:rounded-[1.35rem]"
-          aria-label={`Open case study for ${project.title}`}
         >
           <ProjectMedia
             imageUrl={project.imageUrl}
@@ -36,7 +47,6 @@ export function ProjectShowcaseCard({ project, index }: ProjectShowcaseCardProps
 
         <div className="mt-4 space-y-4">
           <div className="flex flex-wrap items-center gap-2.5">
-            <span className="eyebrow">Module {String(index + 2).padStart(2, "0")}</span>
             <span className="chip">{project.type}</span>
             <span className="chip">{project.status}</span>
           </div>
@@ -53,7 +63,7 @@ export function ProjectShowcaseCard({ project, index }: ProjectShowcaseCardProps
           </div>
 
           <ProjectCompactMeta items={metaItems} />
-          <ProjectActions project={project} />
+          <ProjectActions project={project} labels={actionLabels} />
         </div>
       </article>
     </Reveal>
